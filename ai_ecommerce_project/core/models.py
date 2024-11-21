@@ -10,6 +10,7 @@ class Product(models.Model):
     category = models.ForeignKey(
         'Category', on_delete=models.SET_NULL, null=True, blank=True)
     image = models.ImageField(upload_to='products/', null=True, blank=True)
+    is_featured = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -19,7 +20,7 @@ class Product(models.Model):
 
 
 class Category(models.Model):
-    """Moddel represents broader classification of each product"""
+    """Model represents broader classification of each product"""
     name = models.CharField(max_length=255)
     description = models.TextField()
     parent_category = models.ForeignKey(
