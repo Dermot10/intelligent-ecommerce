@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "debug_toolbar",
     "rest_framework",
-    "rest_framework.authtoken",
+    "rest_framework_simplejwt",
     "cart",
     "core",
     "orders",
@@ -140,7 +140,8 @@ INTERNAL_IPS = [
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # Use this for JWT authentication
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
 }

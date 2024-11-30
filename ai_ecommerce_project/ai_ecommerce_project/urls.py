@@ -25,4 +25,5 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('api/core/', include('core.urls')),
     path('api/users/', include('users.urls')),
+    path('api/auth/', include('users.token_urls'))
 ] + debug_toolbar_urls()
