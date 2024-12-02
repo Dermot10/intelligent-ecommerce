@@ -4,9 +4,13 @@ from core.models import Product
 
 
 class CartItemSerializer(serializers.ModelSerializer):
+
+    product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), source='product')
+    product_name = serializers.CharField(source='product.name', read_only=True)
+
     class Meta:
         model = CartItem
-        fields = ['id', 'product', 'quantity']
+        fields = ['id', 'product_id', 'product_name', 'quantity']
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -15,4 +19,4 @@ class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ['id', 'user', 'items', 'created_at']
+        fields = ['id', 'user', 'items', 'created_at', 'updated_at']
