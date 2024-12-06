@@ -24,14 +24,8 @@ class OrderSerializer(serializers.ModelSerializer):
     order_number = serializers.CharField(read_only=True)
     
 
-    def validate(self, data):
-        items = data.get('items')
-        if not items or not isinstance(items, list):
-            raise serializers.ValidationError({'items': 'This field must be a list of items.'})
-        
-        return data
-
     def create(self, validated_data):
+        """"""
         # Extract the items data from the validated data
         items_data = validated_data.pop('items', [])
         order = Order.objects.create(**validated_data)

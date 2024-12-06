@@ -28,48 +28,18 @@ class OrderViewSet(viewsets.ModelViewSet):
         # Apply taxes, discounts, or shipping if needed
         return total_price
 
-
-    # def perform_create(self, serializer):
-    #     cart = self.get_cart_for_user(self.request.user)
-    #     cart_items = cart.items.all()
-    #     logger.info(f"Cart items retrieved: {cart_items}")
-    #     order_number = uuid.uuid4().hex[:8].upper()
-        
-    #     if not cart_items:
-    #         return Response({'error': 'Cart is empty'}, status=status.HTTP_400_BAD_REQUEST)
-        
-    #     total_price = self.calculate_order_total(cart_items)
-
-    #     # Create the order
-    #     order = serializer.save(user=self.request.user, order_number=order_number, total_price=total_price)
-    #     logger.info(f"Order created successfully: {order}")
-
-    #     order_data = {
-    #         "user": self.request.user,
-    #         "order_number": order_number,
-    #     }
-    #     logger.debug(f"Order creation data: {order_data}")
-        
-    #     # Populate OrderItem from CartItem
-    #     for item in cart_items:
-    #         OrderItem.objects.create(
-    #             order=order,
-    #             product=item.product,
-    #             quantity=item.quantity,
-    #             price_per_unit=item.product.price
-    #         )
-    #         logger.info(f"Processing cart item: {item}")
-
-    #     # Clear the cart
-    #     cart.items.all().delete()
-    #     logger.info("Cart cleared successfully")
+    def create_order_number(self): 
+        """Helper method to create order number for a given order"""
+        order_number = uuid.uuid4().hex[:8].upper()
+        return order_number
 
     def perform_create(self, serializer):
+        """Create a new order and save it to the database as per CRUD operation"""
         cart = self.get_cart_for_user(self.request.user)
         cart_items = cart.items.all()
+        order_number = self.create_order_number()
 
         logger.info(f"Cart items retrieved: {cart_items}")
-        order_number = uuid.uuid4().hex[:8].upper()
 
         if not cart_items:
             return Response({'error': 'Cart is empty'}, status=status.HTTP_400_BAD_REQUEST)
