@@ -1,8 +1,10 @@
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from .models import Cart, CartItem, Product
 from .serializers import CartSerializer
+
 
 class CartViewSet(viewsets.ModelViewSet):
     """
@@ -22,6 +24,7 @@ class CartViewSet(viewsets.ModelViewSet):
         Helper method to get or create a cart for the authenticated user.
         """
         return Cart.objects.get_or_create(user=user)
+    
 
     def list(self, request, *args, **kwargs):
         """
@@ -38,7 +41,7 @@ class CartViewSet(viewsets.ModelViewSet):
         cart, created = self.get_or_create_cart(request.user)
         product_id = request.data.get('product_id')
         quantity = request.data.get('quantity', 1)
-
+        
         if not product_id:
             return Response({'error': 'Product ID is required'}, status=status.HTTP_400_BAD_REQUEST) 
             
@@ -51,7 +54,13 @@ class CartViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
 
         cart_item, item_created = CartItem.objects.get_or_create(cart=cart, product=product)
-        cart_item.quantity += int(quantity)
+        
+        # if newly created cart item or increment quantity
+        if item_created:
+            cart_item.quantity = int(quantity)  
+        else:
+            cart_item.quantity = int(quantity) 
+
         cart_item.save()
 
         serializer = self.get_serializer(cart)

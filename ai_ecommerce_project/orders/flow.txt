@@ -1,0 +1,3 @@
+Request -> Main URL Router -> App URL Router -> View 
+-> Model Interaction -> Serializer -> Response
+
