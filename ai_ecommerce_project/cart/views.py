@@ -1,8 +1,10 @@
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from .models import Cart, CartItem, Product
 from .serializers import CartSerializer
+
 
 class CartViewSet(viewsets.ModelViewSet):
     """
@@ -22,6 +24,7 @@ class CartViewSet(viewsets.ModelViewSet):
         Helper method to get or create a cart for the authenticated user.
         """
         return Cart.objects.get_or_create(user=user)
+    
 
     def list(self, request, *args, **kwargs):
         """
