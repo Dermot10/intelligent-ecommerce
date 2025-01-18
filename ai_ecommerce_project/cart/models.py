@@ -16,7 +16,8 @@ class Cart(models.Model):
 class CartItem(models.Model):
     """Transaction model for user's individual Cart items linked to a product"""
     cart = models.ForeignKey(
-        Cart, on_delete=models.CASCADE, related_name='items') # related name allows for instances of CartItem model in relation to User to be retrieved with syntax items
+        Cart, on_delete=models.CASCADE, related_name='items') 
+        # related name allows for instances of CartItem model in relation to User to be retrieved with syntax items
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
 
