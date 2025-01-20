@@ -23,7 +23,7 @@ class CartViewSet(viewsets.ModelViewSet):
         """
         Helper method to get or create a cart for the authenticated user.
         """
-        return Cart.objects.get_or_create(user=user)
+        return Cart.objects.get_or_create(user=user) #model object created
     
 
     def list(self, request, *args, **kwargs):
@@ -43,8 +43,7 @@ class CartViewSet(viewsets.ModelViewSet):
         quantity = request.data.get('quantity', 1)
         
         if not product_id:
-            return Response({'error': 'Product ID is required'}, status=status.HTTP_400_BAD_REQUEST) 
-            
+            return Response({'error': 'Product ID is required'}, status=status.HTTP_400_BAD_REQUEST)    
         if quantity <= 0:
             return Response({'error': 'Quantity must be greater than 0'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -70,7 +69,7 @@ class CartViewSet(viewsets.ModelViewSet):
         """
         Remove an item from the authenticated user's cart.
         """
-        pk = kwargs.get('pk')
+        pk = kwargs.get('pk') #cart id
         try:
             cart_item = CartItem.objects.get(id=pk, cart__user=request.user)
             cart_item.delete()
