@@ -65,6 +65,12 @@ class CartViewSet(viewsets.ModelViewSet):
         cart_item, item_created = CartItem.objects.get_or_create(
             cart=cart, product=product)
 
+        # if newly created cart item or increment quantity
+        if item_created:
+            cart_item.quantity = int(quantity)
+        else:
+            cart_item.quantity = int(quantity)
+
         cart_item.save()
 
         serializer = self.get_serializer(cart)
