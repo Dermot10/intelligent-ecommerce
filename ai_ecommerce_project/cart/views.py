@@ -69,7 +69,7 @@ class CartViewSet(viewsets.ModelViewSet):
         if item_created:
             cart_item.quantity = int(quantity)
         else:
-            cart_item.quantity = int(quantity)
+            cart_item.quantity += int(quantity)
 
         cart_item.save()
 
