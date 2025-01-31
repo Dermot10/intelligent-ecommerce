@@ -8,6 +8,8 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from .models import Customer
 from .serializers import UserSerializer, CustomerSerializer
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 
 class RegisterUserView(generics.CreateAPIView):
@@ -26,6 +28,7 @@ class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    @method_decorator(cache_page(60 * 5))
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         if not queryset:
