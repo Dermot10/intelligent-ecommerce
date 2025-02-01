@@ -110,20 +110,20 @@ class OrderViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED
         )
 
-    # def delete_order_item(self, request, *args, **kwargs ): 
-    #     """Delete specific order item from user"""
-    #     user = request.user
-    #     order_number = kwargs.get('order_number')
-    #     order_item_id = kwargs.get('order_item_id')
+    @action(detail=True, methods=['delete'], url_path='delete_single_orderitem/(?P<order_item_id>\d+)')
+    def delete_single_orderitem(self, request, *args, **kwargs): 
+        """Delete specific order item from user"""
+        order = self.get_object()
+        order_item_id = kwargs.get('order_item_id')
 
-    #     order = get_object_or_404(Order, user=user, order_number=order_number)
-    #     order_item = get_object_or_404(OrderItem, id=order_item_id, order=order)
+        # order = get_object_or_404(Order, user=request.user, order_number=order_number)
+        order_item = get_object_or_404(OrderItem, id=order_item_id, order=order)
 
-    #     order.total_price -= order_item.quantity * order_item.price_per_unit 
-    #     order_item.delete()
-    #     order.save()
+        order.total_price -= order_item.quantity * order_item.price_per_unit 
+        order_item.delete()
+        order.save()
         
-    #     return Response({f'message': 'order_item {order_item} was successfully deleted'}, status= status.HTTP_204_NO_CONTENT)
+        return Response({f'message': 'order_item {order_item} was successfully deleted'}, status= status.HTTP_204_NO_CONTENT)
     
     @action(detail=True, methods=['delete'])
     def delete_single_order(self, request, *args, **kwargs): 
