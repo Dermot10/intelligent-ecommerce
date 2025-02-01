@@ -1,7 +1,7 @@
-import re
 from urllib import request
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from cart.models import Cart, CartItem
 from cart.views import CartViewSet
@@ -110,8 +110,51 @@ class OrderViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED
         )
 
+    # def delete_order_item(self, request, *args, **kwargs ): 
+    #     """Delete specific order item from user"""
+    #     user = request.user
+    #     order_number = kwargs.get('order_number')
+    #     order_item_id = kwargs.get('order_item_id')
+
+    #     order = get_object_or_404(Order, user=user, order_number=order_number)
+    #     order_item = get_object_or_404(OrderItem, id=order_item_id, order=order)
+
+    #     order.total_price -= order_item.quantity * order_item.price_per_unit 
+    #     order_item.delete()
+    #     order.save()
+        
+    #     return Response({f'message': 'order_item {order_item} was successfully deleted'}, status= status.HTTP_204_NO_CONTENT)
+    
+    @action(detail=True, methods=['delete'])
+    def delete_single_order(self, request, *args, **kwargs): 
+        """Delete complete single order for user by id"""
+        order = get_object_or_404(Order, user=request.user, id=request.order_id)
+        order.items.all().delete()  # Should delete all related items
+        order.delete()
+                
+        return Response({f'message': 'order {order.order_number} successfully deleted'}, status= status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=['delete'])
+    def delete_all_orders(self, request, *args, **kwargs): 
+        """Delete all orders for user"""
+        print("Request received for user:", request.user)
+        orders = Order.objects.filter(user=request.user)
+
+        print(f"Orders for user {request.user.username}: {orders}")
+        if orders.exists(): 
+            for order in orders: 
+                order.items.all().delete()
+            orders.delete()
+                
+            return Response({f'message': 'All orders for {user} have been successfully deleted'}, status=status.HTTP_204_NO_CONTENT)
+        else: 
+            return Response({f'error': 'No orders for {user} found'}, status=status.HTTP_404_NOT_FOUND)
+
+
     def list(self, request, *args, **kwargs):
         """Optional: Restrict orders to the logged-in user."""
         queryset = Order.objects.filter(user=request.user)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+  
