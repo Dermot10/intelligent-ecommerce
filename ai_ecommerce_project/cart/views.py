@@ -5,8 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from .models import Cart, CartItem, Product
+from .models import Cart, CartItem
 from .serializers import CartSerializer, CartItemSerializer
+from .utils import validate_product_and_quantity
 
 
 class CartViewSet(viewsets.ModelViewSet):
@@ -38,19 +39,6 @@ class CartViewSet(viewsets.ModelViewSet):
         serializer = CartItemSerializer(cart_items, many=True)
         return serializer.data
 
-    def validate_product_and_quantity(self, product_id: Optional[int],
-                                      quantity: Optional[int]) -> Tuple[Optional[Product], Optional[str]]:
-        if product_id is None:
-            return "Product ID not found"
-        if quantity is None or quantity <= 0:
-            return "Quantity must be 1 or greater"
-
-        try:
-            product = Product.objects.get(id=product_id)
-            return product, None
-        except Product.DoesNotExist:
-            return None, 'Product not found'
-
     def list(self, request, *args, **kwargs):
         """
         List the cart for the authenticated user.
@@ -67,7 +55,7 @@ class CartViewSet(viewsets.ModelViewSet):
         product_id = request.data.get('product_id')
         quantity = request.data.get('quantity', 1)
 
-        product, error = self.validate_product_and_quantity(
+        product, error = validate_product_and_quantity(
             product_id, quantity)
         if error:
             return Response({'error': error}, status=status.HTTP_400_BAD_REQUEST)

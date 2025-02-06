@@ -8,8 +8,8 @@ from cart.views import CartViewSet
 from cart.serializers import CartItemSerializer
 from .models import Order, OrderItem, Product
 from .serializers import OrderSerializer
+from .utils import get_latest_order_for_user, calculate_order_total, create_order_number
 from decimal import Decimal
-import uuid
 import logging 
 
 logger = logging.getLogger(__name__)
@@ -19,40 +19,29 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
-    
     @action(detail=False, methods=['get'])
-    def latest_order(self, request): 
+    def latest_order(self, request) -> Response: 
         user = request.user
-        order = Order.objects.filter(user=user).order_by('-order_date').first()
+        order = get_latest_order_for_user(user)
         if not order: 
             return Response({"detail: No orders found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = OrderSerializer(order)
         return Response(serializer.data)
 
-    def get_serialized_user_order(self, user): 
-        order = self.latest_order(user)
+    def get_serialized_user_order(self, request) -> Response: 
+        user = request.user
+        order = get_latest_order_for_user(user)
         if not order: 
             return None
         serializered_order = OrderSerializer(order, many=True)
         return serializered_order
-    
-    def calculate_order_total(self, cart_items):
-        total_price = sum(item.product.price * item.quantity for item in cart_items)
-        # Apply taxes, discounts, or shipping if needed
-        return total_price
-
-    def create_order_number(self): 
-        """Helper method to create order number for a given order"""
-        order_number = uuid.uuid4().hex[:8].upper()
-        return order_number
-
  
-    def create(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs) -> Response:
         """
         Create an order for the authenticated user based on their cart items.
         """
         user = request.user
-        order_number = self.create_order_number()
+        order_number = create_order_number()
 
         # Step 1: Retrieve the user's cart
         cart = get_object_or_404(Cart, user=user)
@@ -96,7 +85,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         )
 
     @action(detail=True, methods=['delete'], url_path='delete_single_orderitem/(?P<order_item_id>\d+)')
-    def delete_single_orderitem(self, request, *args, **kwargs): 
+    def delete_single_orderitem(self, request, *args, **kwargs) -> Response: 
         """Delete specific order item from user"""
         order = self.get_object()
         order_item_id = kwargs.get('order_item_id')
@@ -111,7 +100,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response({f'message': 'order_item {order_item} was successfully deleted'}, status= status.HTTP_204_NO_CONTENT)
     
     @action(detail=True, methods=['delete'])
-    def delete_single_order(self, request, *args, **kwargs): 
+    def delete_single_order(self, request, *args, **kwargs) -> Response: 
         """Delete complete single order for user by id"""
         order = get_object_or_404(Order, user=request.user, id=request.order_id)
         order.items.all().delete()  # Should delete all related items
@@ -120,7 +109,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response({f'message': 'order {order.order_number} successfully deleted'}, status= status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['delete'])
-    def delete_all_orders(self, request, *args, **kwargs): 
+    def delete_all_orders(self, request, *args, **kwargs) -> Response: 
         """Delete all orders for user"""
         print("Request received for user:", request.user)
         orders = Order.objects.filter(user=request.user)
@@ -136,7 +125,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({f'error': 'No orders for {user} found'}, status=status.HTTP_404_NOT_FOUND)
 
 
-    def list(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs) -> Response:
         """Optional: Restrict orders to the logged-in user."""
         queryset = Order.objects.filter(user=request.user)
         serializer = self.get_serializer(queryset, many=True)
