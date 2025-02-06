@@ -19,38 +19,23 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
-    def get_cart_for_user(self, user):
-        """
-        Retrieve the user's cart, including items.
-        """
-        try:
-            cart = Cart.objects.get(user=user)
-            return cart
-        except Cart.DoesNotExist:
-            return None
     
-    def get_cart_items_for_user(self, user):
-        """
-        Retrieve all CartItems for the user's cart.
-        """
-        # Ensure the user has a cart
-        cart = get_object_or_404(Cart, user=user)
+    @action(detail=False, methods=['get'])
+    def latest_order(self, request): 
+        user = request.user
+        order = Order.objects.filter(user=user).order_by('-order_date').first()
+        if not order: 
+            return Response({"detail: No orders found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
 
-        # Retrieve the CartItems associated with the cart
-        cart_items = CartItem.objects.filter(cart=cart)
-
-        return cart_items
-
-    def get_serialized_cart_items(self, user):
-        """
-        Retrieve and serialize all CartItems for the user's cart.
-        """
-        cart = get_object_or_404(Cart, user=user)
-        cart_items = cart.items.all()
-
-        serializer = CartItemSerializer(cart_items, many=True)
-        return serializer.data
-
+    def get_serialized_user_order(self, user): 
+        order = self.latest_order(user)
+        if not order: 
+            return None
+        serializered_order = OrderSerializer(order, many=True)
+        return serializered_order
+    
     def calculate_order_total(self, cart_items):
         total_price = sum(item.product.price * item.quantity for item in cart_items)
         # Apply taxes, discounts, or shipping if needed

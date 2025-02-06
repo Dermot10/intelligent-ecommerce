@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from .models import Cart, CartItem, Product
-from .serializers import CartSerializer
+from .serializers import CartSerializer, CartItemSerializer
 
 
 class CartViewSet(viewsets.ModelViewSet):
@@ -27,6 +27,16 @@ class CartViewSet(viewsets.ModelViewSet):
         Helper method to get or create a cart model for the authenticated user.
         """
         return Cart.objects.get_or_create(user=user)
+    
+    def get_serialized_cart_items(self, user):
+        """
+        Retrieve and serialize all CartItems for the user's cart.
+        """
+        cart = get_object_or_404(Cart, user=user)
+        cart_items = cart.items.all()
+
+        serializer = CartItemSerializer(cart_items, many=True)
+        return serializer.data
 
     def validate_product_and_quantity(self, product_id: Optional[int],
                                       quantity: Optional[int]) -> Tuple[Optional[Product], Optional[str]]:
