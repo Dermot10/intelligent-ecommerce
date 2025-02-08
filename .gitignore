@@ -6,3 +6,4 @@ __pycache__/
 .vscode/
 .gitignore
 .test_order_script.py
+.payment_test_script.py
