@@ -46,7 +46,6 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
         if not customer_order:
             return Response({"error": "No order found"}, status=status.HTTP_404_NOT_FOUND)
-
         transaction_id = create_transaction_id()
 
         payment = Payment.objects.create(
