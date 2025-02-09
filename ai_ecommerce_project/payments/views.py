@@ -36,6 +36,12 @@ class PaymentViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(payment, many=True)  
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'])
+    def list_payments(self, request) -> Response: 
+        queryset = Payment.objects.filter(user=request.user)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     @action(detail=False, methods=['post'])
     def create_order_payment(self, request) -> Response:
         if not request.user or not request.user.is_authenticated:
@@ -62,7 +68,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
 
     @action(detail=False, methods=['patch', 'put'])
-    def provide_payment_details(self, request, ) -> Response: 
+    def provide_payment_details(self, request) -> Response: 
         pass
 
 
