@@ -3,11 +3,19 @@ from django.contrib.auth.models import User
 from orders.models import Order
 
 class Payment(models.Model):
-    payment_choices=[('pending', 'Pending'), ('completed', 'Completed'), ('failed', 'Failed')]
+    payment_choices=[('pending', 'Pending'), ('completed', 'Completed'), ('failed', 'Failed'), ('cancelled', 'Cancelled')]
+    payment_methods = [
+        ('paypal', 'PayPal'),
+        ('apple_pay', 'Apple Pay'),
+        ('visa', 'Visa'),
+        ('mastercard', 'Mastercard'),
+        ('amex', 'American Express'),
+        ('klarna', 'Klarna'),
+    ]
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='payments')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    payment_method = models.CharField(max_length=255)  
+    payment_method = models.CharField(max_length=30, choices=payment_methods, default='visa')  
     payment_status = models.CharField(
         max_length=50,
         choices=payment_choices,
