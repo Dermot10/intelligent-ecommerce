@@ -5,8 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from .models import Cart, CartItem, Product
-from .serializers import CartSerializer
+from .models import Cart, CartItem
+from .serializers import CartSerializer, CartItemSerializer
+from .utils import validate_product_and_quantity
 
 
 class CartViewSet(viewsets.ModelViewSet):
@@ -27,19 +28,16 @@ class CartViewSet(viewsets.ModelViewSet):
         Helper method to get or create a cart model for the authenticated user.
         """
         return Cart.objects.get_or_create(user=user)
+    
+    def get_serialized_cart_items(self, user):
+        """
+        Retrieve and serialize all CartItems for the user's cart.
+        """
+        cart = get_object_or_404(Cart, user=user)
+        cart_items = cart.items.all()
 
-    def validate_product_and_quantity(self, product_id: Optional[int],
-                                      quantity: Optional[int]) -> Tuple[Optional[Product], Optional[str]]:
-        if product_id is None:
-            return "Product ID not found"
-        if quantity is None or quantity <= 0:
-            return "Quantity must be 1 or greater"
-
-        try:
-            product = Product.objects.get(id=product_id)
-            return product, None
-        except Product.DoesNotExist:
-            return None, 'Product not found'
+        serializer = CartItemSerializer(cart_items, many=True)
+        return serializer.data
 
     def list(self, request, *args, **kwargs):
         """
@@ -57,7 +55,7 @@ class CartViewSet(viewsets.ModelViewSet):
         product_id = request.data.get('product_id')
         quantity = request.data.get('quantity', 1)
 
-        product, error = self.validate_product_and_quantity(
+        product, error = validate_product_and_quantity(
             product_id, quantity)
         if error:
             return Response({'error': error}, status=status.HTTP_400_BAD_REQUEST)

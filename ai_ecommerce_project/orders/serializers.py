@@ -4,10 +4,10 @@ from core.models import Product
 from .models import Order, OrderItem
 
 
-#import logging
+import logging
 
 
-#logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)

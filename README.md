@@ -9,23 +9,16 @@ With a scalable and modular architecture, the system is equipped to handle moder
 # Project Structure -
 
 ai_ecommerce_project/
-├── ai_ecommerce_project/ # Main Django project configuration
-├── cart/ # Core API functionality
-│ ├── admin.py
-│ ├── apps.py
-│ ├── models.py # Database models for User, Cart, CartItem, Order
-│ ├── serializers.py # Serialization logic for API endpoints
-│ ├── tests.py
-│ ├── urls.py # View logic for handling requests
-├── core/
-├── orders/
-├── paymemts/
-├── reviews/
-├── shipments/
-├── users/
-├── manage.py
-├── requirements.txt # Project dependencies
-└── README.md # Project documentation
+cart/
+core/
+orders/
+paymemts/
+reviews/
+shipments/
+users/
+manage.py
+requirements.txt # Project dependencies
+README.md # Project documentation
 
 # API Endpoints -
 
