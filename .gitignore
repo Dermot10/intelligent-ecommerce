@@ -5,3 +5,5 @@ __pycache__/
 .DS_Store
 .vscode/
 .gitignore
+.test_order_script.py
+.payment_test_script.py
